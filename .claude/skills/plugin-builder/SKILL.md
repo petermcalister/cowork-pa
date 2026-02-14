@@ -144,6 +144,15 @@ This means:
 
 Design accordingly: use agents for code analysis, file processing, and built-in tool work. Keep MCP-dependent workflows in skills/commands.
 
+### CRITICAL: Chrome Browser Tools Require Cowork
+
+Claude Code **cannot** connect to the Chrome browser extension directly. The Chrome native host (`chrome-native-host.exe`) only accepts connections from whitelisted Chrome extension origins via Chrome's native messaging API. Cowork works because it communicates through the Chrome extension; Claude Code cannot bypass Chrome's security model.
+
+This means:
+- Plugins using `mcp__Claude_in_Chrome__*` tools **must run in Cowork**, not standalone Claude Code
+- There is no `.mcp.json` config that makes Chrome tools work in Claude Code on Windows
+- If your plugin needs browser automation, it is a Cowork plugin — not a native Claude Code project
+
 ## Building Hooks
 
 Event handlers in `hooks/hooks.json`:
