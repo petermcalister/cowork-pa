@@ -1,6 +1,6 @@
 #!/bin/bash
 # deploy-plugin.sh
-# Builds pete-pa.plugin from the cowork-pa repo and opens it for Cowork install.
+# Builds pete-pa.zip from the cowork-pa repo ready for drag-and-drop into Cowork.
 # Usage: ./deploy-plugin.sh [path-to-repo]
 # Default repo path: ~/RepoBase/cowork-pa
 
@@ -29,48 +29,31 @@ echo ""
 
 # Clean old build
 mkdir -p "$OUTPUT_DIR"
-rm -f "$OUTPUT_DIR/$PLUGIN_NAME.plugin"
+rm -f "$OUTPUT_DIR/$PLUGIN_NAME.plugin.zip"
 
 # Package from the plugin subdirectory
-echo "Packaging $PLUGIN_NAME.plugin..."
+echo "Packaging $PLUGIN_NAME.plugin.zip..."
 cd "$PLUGIN_DIR"
 
 if command -v zip &> /dev/null; then
-    # Use zip if available
-    zip -r "$OUTPUT_DIR/$PLUGIN_NAME.plugin" . \
+    zip -r "$OUTPUT_DIR/$PLUGIN_NAME.plugin.zip" . \
         -x ".git/*" \
         -x "*.DS_Store"
 else
     # Fallback: use PowerShell Compress-Archive on Windows
     echo "zip not found, using PowerShell..."
     WIN_SRC=$(cygpath -w "$PLUGIN_DIR")
-    WIN_DST=$(cygpath -w "$OUTPUT_DIR/$PLUGIN_NAME.zip")
-    WIN_FINAL=$(cygpath -w "$OUTPUT_DIR/$PLUGIN_NAME.plugin")
+    WIN_DST=$(cygpath -w "$OUTPUT_DIR/$PLUGIN_NAME.plugin.zip")
     powershell.exe -NoProfile -Command "Compress-Archive -Path '$WIN_SRC\\*' -DestinationPath '$WIN_DST' -Force"
-    # Rename .zip to .plugin
-    mv "$OUTPUT_DIR/$PLUGIN_NAME.zip" "$OUTPUT_DIR/$PLUGIN_NAME.plugin"
 fi
 
 # Verify the file was created
-if [ ! -f "$OUTPUT_DIR/$PLUGIN_NAME.plugin" ]; then
+if [ ! -f "$OUTPUT_DIR/$PLUGIN_NAME.plugin.zip" ]; then
     echo ""
-    echo "ERROR: Failed to create $PLUGIN_NAME.plugin"
+    echo "ERROR: Failed to create $PLUGIN_NAME.plugin.zip"
     exit 1
 fi
 
 echo ""
-echo "Plugin built: $OUTPUT_DIR/$PLUGIN_NAME.plugin"
-echo ""
-
-# Open the file for Cowork install
-WIN_PLUGIN=$(cygpath -w "$OUTPUT_DIR/$PLUGIN_NAME.plugin" 2>/dev/null)
-if [ -n "$WIN_PLUGIN" ]; then
-    explorer.exe "$WIN_PLUGIN"
-elif command -v open &> /dev/null; then
-    open "$OUTPUT_DIR/$PLUGIN_NAME.plugin"
-elif command -v xdg-open &> /dev/null; then
-    xdg-open "$OUTPUT_DIR/$PLUGIN_NAME.plugin"
-fi
-
-echo ""
-echo "Done! Accept the plugin in Cowork to complete installation."
+echo "Plugin built: $OUTPUT_DIR/$PLUGIN_NAME.plugin.zip"
+echo "Drag and drop into Cowork to install."
