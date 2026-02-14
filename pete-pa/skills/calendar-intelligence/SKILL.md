@@ -5,7 +5,7 @@ description: >
   "what's in my calendar", "add this to my calendar", "extract dates from emails",
   "find commitments in my inbox", "when is [person]'s birthday", or needs help
   managing personal calendar events and date tracking from email correspondence.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Calendar Intelligence
@@ -24,10 +24,13 @@ Track recurring personal events in Google Calendar:
 
 **How to find birthdays:**
 
-Use the Google Calendar MCP tools to search for events containing keywords:
-- "birthday", "bday", "b-day"
-- "anniversary"
-- Names of family members Pete has mentioned
+Use Claude in Chrome browser tools to navigate to calendar.google.com and:
+- Search for events containing keywords: "birthday", "bday", "b-day"
+- Search for "anniversary"
+- Search for names of family members Pete has mentioned
+- Check that the "Birthdays" calendar (from Google Contacts) is visible in the sidebar
+
+Refer to `references/browser-gcal-guide.md` for detailed browser navigation steps.
 
 Search across the next 30 days for upcoming events.
 Present results sorted by proximity (soonest first).
@@ -45,8 +48,10 @@ Scan recent Gmail and Outlook emails for dates that should be added to Pete's ca
 
 **Extraction process:**
 
-1. Use Gmail MCP to search recent emails (last 7 days unless specified)
-2. Use Outlook browser automation to scan inbox
+1. Use Chrome browser tools to navigate to mail.google.com and scan recent emails
+   (last 7 days unless specified). Follow `${CLAUDE_PLUGIN_ROOT}/skills/peter-morning-brief-skill/references/browser-gmail-guide.md`.
+2. Use Chrome browser tools to navigate to outlook.live.com and scan the inbox.
+   Follow `${CLAUDE_PLUGIN_ROOT}/skills/peter-morning-brief-skill/references/browser-outlook-guide.md`.
 3. For each email, identify date-bearing content:
    - Explicit dates: "March 15", "15/03", "next Friday"
    - Relative dates: "in two weeks", "end of month", "next quarter"
@@ -84,27 +89,37 @@ MEDIUM CONFIDENCE:
 ### 3. Calendar Event Creation
 
 When Pete confirms dates to add:
-1. Use Google Calendar MCP to create the event
-2. Set appropriate reminders (1 day before for deadlines, 1 week for birthdays)
-3. Include the source email reference in the event description
-4. For all-day events (birthdays, deadlines), create as all-day events
-5. For timed events, set the specific time
+1. Use Chrome browser tools to navigate to calendar.google.com
+2. Create the event via the browser interface (click Create, fill in details)
+3. Set appropriate reminders (1 day before for deadlines, 1 week for birthdays)
+4. Include the source email reference in the event description
+5. For all-day events (birthdays, deadlines), toggle the "All day" option
+6. For timed events, set the specific start and end time
+7. For recurring events (birthdays, anniversaries), set annual recurrence
+
+Refer to `references/browser-gcal-guide.md` Part 2 for event creation steps.
 
 ### 4. Calendar Overview
 
 When Pete asks "what's in my calendar" or "what's my week look like":
-1. Fetch events for the requested period (default: next 7 days)
-2. Group by day
-3. Highlight conflicts (overlapping events)
-4. Flag any birthdays or personal events
-5. Note free blocks longer than 2 hours
+1. Navigate to calendar.google.com via Chrome browser
+2. Switch to the appropriate view (day or week)
+3. Read all events for the requested period (default: next 7 days)
+4. Group by day
+5. Highlight conflicts (overlapping events)
+6. Flag any birthdays or personal events
+7. Note free blocks longer than 2 hours
+
+Refer to `references/browser-gcal-guide.md` for navigation steps.
 
 ## Error Handling
 
-- If Google Calendar MCP is not connected, inform Pete and suggest connecting it
-- If event creation fails, provide the event details so Pete can add it manually
+- If calendar.google.com requires sign-in, inform Pete and ask him to sign in manually
+- If event creation fails via the browser, provide the event details so Pete can add it manually
 - For ambiguous dates, ask Pete to clarify rather than guessing
+- If a CAPTCHA or verification prompt appears, inform Pete and skip that source
 
 ## Additional Resources
 
+- **`references/browser-gcal-guide.md`** — Google Calendar browser navigation (read + create)
 - **`references/date-patterns.md`** — comprehensive date extraction patterns and regex

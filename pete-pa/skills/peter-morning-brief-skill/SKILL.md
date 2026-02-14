@@ -5,7 +5,7 @@ description: >
   "daily summary", "what's happening today", "catch me up", "morning update",
   or wants a consolidated view of his calendar, emails, and messaging channels.
   Also triggers when Pete asks to "summarize articles" from WhatsApp or Telegram.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Morning Brief
@@ -27,20 +27,30 @@ Present the briefing in this exact order:
 
 ## Data Source Workflow
 
-### Google Calendar (MCP)
+### Google Calendar (Browser-based)
 
-Use the Google Calendar MCP tools to:
-- Fetch today's events
-- Fetch the next 7 days for upcoming birthdays/anniversaries
-- Look for events with keywords: "birthday", "anniversary", "bday"
+Use Claude in Chrome browser tools to:
+- Navigate to calendar.google.com
+- Fetch today's events from the day view
+- Switch to week view to check the next 7 days for upcoming birthdays/anniversaries
+- Search for events with keywords: "birthday", "anniversary", "bday"
+- Do NOT enter credentials — Pete will already be signed in
 
-### Gmail (MCP)
+Refer to `references/browser-gcal-guide.md` for detailed browser navigation steps.
+The guide is located in the calendar-intelligence skill:
+`${CLAUDE_PLUGIN_ROOT}/skills/calendar-intelligence/references/browser-gcal-guide.md`
 
-Use the Gmail MCP tools to:
-- Search for unread emails from the last 24 hours
-- Prioritize emails from known contacts and flagged/starred messages
+### Gmail (Browser-based)
+
+Use Claude in Chrome browser tools to:
+- Navigate to mail.google.com
+- Search for unread emails from the last 24 hours using `is:unread newer_than:1d`
+- Prioritize emails from known contacts and starred messages
 - Extract any dates, deadlines, or commitments mentioned in email bodies
 - Flag emails that contain calendar-worthy dates
+- Do NOT enter credentials — Pete will already be signed in
+
+Refer to `references/browser-gmail-guide.md` for detailed browser navigation steps.
 
 ### Outlook (Browser-based)
 
@@ -107,10 +117,12 @@ ACTION ITEMS
 ## Error Handling
 
 - If a browser source is unavailable (not signed in, page won't load), skip it and note it in the briefing
-- If Gmail or Calendar MCP isn't connected, note it and suggest Pete connects them
 - Never get stuck on one source — move on after 30 seconds of trying
+- If a CAPTCHA or verification prompt appears, inform Pete and skip that source
 
 ## Additional Resources
 
+- **`references/browser-gmail-guide.md`** — step-by-step Gmail browser navigation
 - **`references/browser-outlook-guide.md`** — step-by-step Outlook browser navigation
 - **`references/browser-messaging-guide.md`** — WhatsApp and Telegram browser navigation
+- **`${CLAUDE_PLUGIN_ROOT}/skills/calendar-intelligence/references/browser-gcal-guide.md`** — Google Calendar browser navigation

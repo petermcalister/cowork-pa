@@ -20,20 +20,19 @@ A Cowork plugin that acts as Pete's personal assistant — managing emails, cale
 
 ## Setup
 
-### MCP Connections Required
-
-After installing the plugin, connect these services in Cowork:
-
-1. **Gmail** — for email scanning and search
-2. **Google Calendar** — for event management and birthday tracking
-
 ### Browser Sessions Required
 
-These services are accessed via Chrome browser automation. Sign into them in Chrome before using:
+All services are accessed via Chrome browser automation (Claude in Chrome). Sign into these services in Chrome before using:
 
+1. **Gmail** — sign in at mail.google.com
+2. **Google Calendar** — sign in at calendar.google.com
 3. **Outlook** — sign in at outlook.live.com
 4. **WhatsApp** — link at web.whatsapp.com
 5. **Telegram** — sign in at web.telegram.org
+
+### Claude in Chrome Extension
+
+The Claude in Chrome extension must be installed and active for browser automation to work.
 
 ### Scheduled Morning Brief
 
@@ -46,7 +45,6 @@ To set up the daily 7am briefing, create a scheduled shortcut in Cowork:
 
 - **2 Skills**: peter-morning-brief-skill, calendar-intelligence
 - **4 Commands**: peter-morning-brief-cmd, scan-emails, check-birthdays, summarize-channels
-- **2 MCP Servers**: Gmail, Google Calendar
 - **1 Hook**: SessionStart (loads assistant context)
 
 ## Tips
