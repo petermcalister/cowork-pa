@@ -13,52 +13,55 @@ version: 0.4.0
 Manage Pete's Google Calendar with focus on birthday/event tracking and
 automatic date extraction from emails.
 
+## Routing
+
+This skill covers 4 capabilities. Determine which one Pete needs:
+
+| Pete says... | Capability |
+|-------------|-----------|
+| "check birthdays", "upcoming events", "when is X's birthday" | 1. Birthday & Event Tracking |
+| "scan emails for dates", "find commitments", "extract dates" | 2. Date Extraction from Emails |
+| "add this to calendar", "create an event", confirmed dates from extraction | 3. Calendar Event Creation |
+| "what's in my calendar", "what's my week look like" | 4. Calendar Overview |
+
 ## Core Capabilities
 
 ### 1. Birthday & Event Tracking
 
-Track recurring personal events in Google Calendar:
-- Family birthdays (sister, nephews, nieces, parents)
-- Anniversaries
-- Other recurring personal dates
+Launch the **gcal-scanner** agent to find upcoming birthdays and personal events.
+Use the Task tool: set the task prompt to "Read the agent definition at
+`${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md` and execute its workflow.
+Search across the next [N] days (default: 30)."
 
-**How to find birthdays:**
+If the agent returns `GCAL_STATUS: OK`, sort results by proximity (soonest first)
+and present with action suggestions:
 
-Launch the **gcal-scanner** agent (`${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`) to:
-- Search for events containing keywords: "birthday", "bday", "b-day"
-- Search for "anniversary"
-- Search for names of family members Pete has mentioned
-- Check that the "Birthdays" calendar (from Google Contacts) is visible in the sidebar
-
-Search across the next 30 days for upcoming events.
-Present results sorted by proximity (soonest first).
-
-**Reminder format:**
 ```
 UPCOMING PERSONAL EVENTS (next 7 days)
 - Sister's Birthday — Saturday 15th (2 days away) — Consider: gift, card, dinner?
 - Nephew Jake's Birthday — Tuesday 19th (6 days away)
 ```
 
+If it returns a non-OK status, inform Pete (e.g. "Calendar not accessible — please sign in at calendar.google.com").
+
 ### 2. Date Extraction from Emails
 
-Scan recent Gmail and Outlook emails for dates that should be added to Pete's calendar.
+Launch **gmail-scanner** and **outlook-scanner** agents in parallel. For each,
+use the Task tool: set the task prompt to "Read the agent definition at [path]
+and execute its workflow. Scan emails from the last [N] days (default: 7)."
 
-**Extraction process:**
+- `${CLAUDE_PLUGIN_ROOT}/agents/gmail-scanner.md`
+- `${CLAUDE_PLUGIN_ROOT}/agents/outlook-scanner.md`
 
-1. Launch **gmail-scanner** and **outlook-scanner** agents in parallel:
-   - `${CLAUDE_PLUGIN_ROOT}/agents/gmail-scanner.md`
-   - `${CLAUDE_PLUGIN_ROOT}/agents/outlook-scanner.md`
-2. Both agents will scan emails for the specified period (default: last 7 days) and extract dates
-3. Load the date patterns reference for confidence scoring:
-   `${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`
-4. Compile extracted dates from both agents, scored by confidence:
-   - **HIGH**: Explicit date + deadline/meeting indicator + specific time
-   - **MEDIUM**: Explicit date without time, or relative date with clear context
-   - **LOW**: Vague relative dates, inferred deadlines
-5. Present findings and ask Pete which ones to add to calendar
+Handle each agent's status code — skip any that return non-OK and note which
+service was unavailable.
 
-**Output format:**
+Merge `DATES EXTRACTED` sections from both agents into one list. Deduplicate
+any dates found in both inboxes. For confidence scoring definitions, refer to
+`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`.
+
+Present findings grouped by confidence and ask Pete which to add:
+
 ```
 DATES FOUND IN RECENT EMAILS
 
@@ -79,40 +82,46 @@ MEDIUM CONFIDENCE:
 
 ### 3. Calendar Event Creation
 
-When Pete confirms dates to add:
-1. Use Chrome browser tools to navigate to calendar.google.com
-2. Create the event via the browser interface (click Create, fill in details)
-3. Set appropriate reminders (1 day before for deadlines, 1 hour before for meetings)
-4. Include the source email reference in the event description
-5. For all-day events (birthdays, deadlines), toggle the "All day" option
-6. For timed events, set the specific start and end time
-7. For recurring events (birthdays, anniversaries), set annual recurrence
+When Pete confirms dates to add, read the event creation guide at
+`${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md` (Part 2) and follow
+its step-by-step instructions to create the event via Chrome browser tools.
 
-Refer to `${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md` Part 2 for event creation steps.
+For each event, provide these parameters to the guide's workflow:
+- **Title**: derived from the email context or Pete's request
+- **Date/Time**: the confirmed date (all-day for birthdays/deadlines, timed for meetings)
+- **Description**: include source reference (e.g. "Extracted from email by [Sender] — [Subject]")
+- **Reminder**: 1 day before for deadlines, 1 hour before for meetings, 1 week before for birthdays
+- **Recurrence**: annual for birthdays and anniversaries
 
 ### 4. Calendar Overview
 
-When Pete asks "what's in my calendar" or "what's my week look like":
+Launch the **gcal-scanner** agent via the Task tool: set the task prompt to
+"Read the agent definition at `${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`
+and execute its workflow. Read events for the next [N] days (default: 7)."
 
-Launch the **gcal-scanner** agent to read events, then:
+If the agent returns `GCAL_STATUS: OK`, post-process its results:
 1. Group events by day
 2. Highlight conflicts (overlapping events)
 3. Flag any birthdays or personal events
 4. Note free blocks longer than 2 hours
 
-Refer to `${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md` for navigation steps.
+If it returns a non-OK status, inform Pete and suggest signing in.
 
 ## Error Handling
 
-- If calendar.google.com requires sign-in, inform Pete and ask him to sign in manually
-- If event creation fails via the browser, provide the event details so Pete can add it manually
+All error handling is based on agent status codes:
+
+- `GCAL_STATUS: NOT_SIGNED_IN` — tell Pete to sign in at calendar.google.com
+- `GMAIL_STATUS: NOT_SIGNED_IN` / `OUTLOOK_STATUS: NOT_SIGNED_IN` — tell Pete which email service needs sign-in
+- `*_STATUS: CAPTCHA_BLOCKED` — inform Pete, skip that source
+- `*_STATUS: TIMEOUT` — inform Pete, skip that source
+- If event creation fails via the browser, present the event details as text so Pete can add manually
 - For ambiguous dates, ask Pete to clarify rather than guessing
-- If a CAPTCHA or verification prompt appears, inform Pete and skip that source
 
 ## Resources
 
-- **`${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md`** — Google Calendar browser navigation (read + create)
-- **`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`** — comprehensive date extraction patterns
+- **`${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md`** — Google Calendar browser navigation (read + create events)
+- **`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`** — date extraction patterns and confidence scoring
 - **`${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`** — calendar scanning agent
 - **`${CLAUDE_PLUGIN_ROOT}/agents/gmail-scanner.md`** — Gmail scanning agent
 - **`${CLAUDE_PLUGIN_ROOT}/agents/outlook-scanner.md`** — Outlook scanning agent

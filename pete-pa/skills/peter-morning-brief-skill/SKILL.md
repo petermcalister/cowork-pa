@@ -4,7 +4,6 @@ description: >
   This skill should be used when Pete asks for a "morning briefing",
   "daily summary", "what's happening today", "catch me up", "morning update",
   or wants a consolidated view of his calendar, emails, and WhatsApp channels.
-  Also triggers when Pete asks to "summarize articles" from WhatsApp.
 version: 0.4.0
 ---
 
@@ -25,9 +24,15 @@ Present the briefing in this exact order:
 6. **Channel Digest** — article summaries from the "cowork-pa" WhatsApp channel
 7. **Action Items** — consolidated list of things Pete needs to act on
 
+If a section has zero items, omit it entirely rather than showing an empty heading.
+If all 4 agents fail, skip straight to a short status report instead of an empty briefing.
+
 ## Agent Orchestration
 
-Launch all 4 scanner agents in parallel using the Task tool to gather data concurrently:
+Launch all 4 scanner agents in parallel. For each agent, use the **Task tool** to
+spawn a subagent — set the task prompt to: "Read the agent definition at [path] and
+execute its workflow." The 4 tasks should be launched in a single batch so they run
+concurrently:
 
 1. **gcal-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`
    Fetches today's events and upcoming birthdays/anniversaries
@@ -38,26 +43,35 @@ Launch all 4 scanner agents in parallel using the Task tool to gather data concu
 4. **whatsapp-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/whatsapp-scanner.md`
    Scans cowork-pa channel for shared articles
 
-Wait for all agents to return, then compile their results into the briefing format below.
+Wait for all agents to return, then compile their results.
+
+### Compiling Agent Results
+
+- **Calendar + Birthdays**: Use gcal-scanner output directly for the CALENDAR and COMING UP sections.
+- **Email Highlights**: Merge email lists from gmail-scanner and outlook-scanner, keeping them under separate Gmail/Outlook subheadings.
+- **Dates to Add**: Merge the `DATES EXTRACTED` sections from both email agents into one list. Deduplicate any dates that appear in both. Sort by confidence (HIGH first).
+- **Channel Digest**: Use whatsapp-scanner output directly.
+- **Action Items**: Synthesize from all sources — emails needing replies, dates to add to calendar, upcoming birthdays needing attention.
 
 ### Handling Agent Status Codes
 
 Each agent returns a status header. Handle failures gracefully:
 
 - `*_STATUS: OK` — include the agent's data in the briefing
-- `*_STATUS: NOT_SIGNED_IN` — note "[Service] skipped — not signed in" in the briefing
-- `*_STATUS: CAPTCHA_BLOCKED` — note "[Service] skipped — CAPTCHA required" in the briefing
-- `*_STATUS: TIMEOUT` — note "[Service] skipped — page didn't load" in the briefing
-- `WHATSAPP_STATUS: QR_CODE_NEEDED` — note "WhatsApp skipped — QR code scan needed"
+- `*_STATUS: NOT_SIGNED_IN` — skip that source, add a note at the end: "[Service] skipped — not signed in"
+- `*_STATUS: CAPTCHA_BLOCKED` — skip, note: "[Service] skipped — CAPTCHA required"
+- `*_STATUS: TIMEOUT` — skip, note: "[Service] skipped — page didn't load"
+- `WHATSAPP_STATUS: QR_CODE_NEEDED` — skip, note: "WhatsApp skipped — QR code scan needed"
 
 Never get stuck on a failed source — compile whatever data is available.
+If all 4 agents fail, inform Pete and suggest checking his browser sign-in status for each service.
 
 ## Presentation Format
 
-Use a clean, scannable format:
+Adapt the greeting to time of day (morning/afternoon/evening). Use a clean, scannable format:
 
 ```
-Good morning Pete! Here's your briefing for [Day, Date].
+Good [morning/afternoon/evening] Pete! Here's your briefing for [Day, Date].
 
 CALENDAR
 - 09:00 — Team standup
@@ -73,10 +87,9 @@ Outlook:
 - [Sender] — [Subject] — [1-line summary]
 
 DATES TO ADD TO CALENDAR
-- "Project deadline March 15" (from email by [Sender])
+- "Project deadline March 15" (from email by [Sender]) — Confidence: HIGH
 
 CHANNEL DIGEST (cowork-pa)
-- [Article title] — [2-sentence summary]
 - [Article title] — [2-sentence summary]
 
 ACTION ITEMS
@@ -85,14 +98,8 @@ ACTION ITEMS
 3. Wish Sarah happy birthday on Thursday
 ```
 
-## Error Handling
+## Follow-Up Actions
 
-- If a scanner agent fails or times out, skip that source and note it in the briefing
-- Never get stuck on one source — move on and compile whatever is available
-- If all agents fail, inform Pete and suggest checking browser sign-in status
-
-## Resources
-
-- **`${CLAUDE_PLUGIN_ROOT}/references/`** — shared browser navigation guides
-- **`${CLAUDE_PLUGIN_ROOT}/agents/`** — parallel scanner agents
-- **`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`** — date extraction patterns
+If Pete asks to add any of the extracted dates to his calendar, load the
+calendar-intelligence skill (`${CLAUDE_PLUGIN_ROOT}/skills/calendar-intelligence/SKILL.md`)
+and follow its Calendar Event Creation workflow.
