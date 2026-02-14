@@ -28,62 +28,57 @@ pete-pa/                          # Plugin root (packaged as .plugin ZIP)
 │   ├── browser-gcal-guide.md
 │   ├── browser-whatsapp-guide.md
 │   └── date-patterns.md
-├── agents/                       # Parallel scanner agents
-│   ├── gmail-scanner.md
-│   ├── outlook-scanner.md
-│   ├── gcal-scanner.md
-│   └── whatsapp-scanner.md
 ├── commands/                     # Thin launcher commands (4 slash commands)
 │   ├── peter-morning-brief-cmd.md
 │   ├── scan-emails.md
 │   ├── check-birthdays.md
 │   └── summarize-channels.md
-└── skills/                       # Orchestration skills (no inline browser steps)
+└── skills/                       # Workflow skills with browser guide references
     ├── peter-morning-brief-skill/
     │   └── SKILL.md
     └── calendar-intelligence/
         └── SKILL.md
 ```
 
-### Commands → Skills → Agents → References
+### Commands → Skills → References
 
-- **Commands** (`commands/*.md`) are thin launchers with YAML frontmatter (`description`, `allowed-tools`, `model`). They load a skill and delegate execution.
-- **Skills** (`skills/*/SKILL.md`) are orchestration workflows with YAML frontmatter (`name`, `description`, `version`). They launch agents in parallel and compile results.
-- **Agents** (`agents/*.md`) are specialized scanner agents with YAML frontmatter (`name`, `description`, `tools`, `model`, `color`). Each agent navigates one web service, extracts data, and returns structured results with status headers.
-- **References** (`references/`) are shared browser navigation guides and pattern libraries. Used by agents and skills — single source of truth for browser navigation steps.
+- **Commands** (`commands/*.md`) are thin launchers with YAML frontmatter (`description`, `allowed-tools`, `model`). They load a skill and set tool permissions for the execution context.
+- **Skills** (`skills/*/SKILL.md`) contain the full workflow with YAML frontmatter (`name`, `description`, `version`). They read browser guides from `references/`, navigate each service sequentially via Chrome browser tools, and compile results.
+- **References** (`references/`) are shared browser navigation guides and pattern libraries — single source of truth for browser navigation steps.
 
 ### Data Flow
 
 ```
-Command → loads Skill → launches Agents (parallel) → Agents read References → navigate browser → return structured data → Skill compiles → presents to Pete
+Command → loads Skill → Skill reads References → navigates browser sequentially → compiles results → presents to Pete
 ```
 
 ### Key Conventions
 
-- Commands use `allowed-tools: Read, Grep, Glob, Bash, Task, WebFetch, mcp__Claude_in_Chrome__*` and `model: sonnet`
-- Commands include `Task` in allowed-tools to launch agents
+- Commands use `allowed-tools: Read, Grep, Glob, Bash, WebFetch, mcp__Claude_in_Chrome__*` and `model: sonnet`
 - Skills use YAML frontmatter with `name`, `description`, `version` fields
-- Agents use YAML frontmatter with `name`, `description`, `tools`, `model`, `color` fields
-- Agents return status headers (e.g. `GMAIL_STATUS: OK` or `GMAIL_STATUS: NOT_SIGNED_IN`)
 - Browser guides follow a consistent pattern: prerequisites, step-by-step navigation, data extraction format, error handling
 - The `${CLAUDE_PLUGIN_ROOT}` variable resolves to the plugin root at runtime
 - Date extraction uses confidence scoring (HIGH/MEDIUM/LOW) defined in `references/date-patterns.md`
 
+### Known Limitation: No MCP Tools in Subagents
+
+Plugin agents (launched via the Task tool) **cannot access MCP tools** like `mcp__Claude_in_Chrome__*`. MCP connections only exist in the parent session's execution context. All browser automation must happen directly in the skill/command execution, not in subagents. This is why the plugin uses sequential scanning in skills rather than parallel agents.
+
 ## Current State
 
-- **Active version**: 0.4.0
+- **Active version**: 0.4.1
 - **WhatsApp**: Focused exclusively on the "cowork-pa" channel (reading articles + posting reports)
 - **Telegram**: Removed in v0.3.0
 - The `claude-plugins-official/` directory contains the cloned Anthropic official plugins repo (reference material for plugin-builder skill)
 
 ## Commands Reference
 
-| Command | Skill Used | Agents Launched | Default Args |
-|---------|-----------|-----------------|--------------|
-| `/peter-morning-brief-cmd` | peter-morning-brief-skill | all 4 scanners | — |
-| `/scan-emails [days]` | calendar-intelligence | gmail + outlook | days-back: 7 |
-| `/check-birthdays [days]` | calendar-intelligence | gcal | days-ahead: 30 |
-| `/summarize-channels` | peter-morning-brief-skill | whatsapp | cowork-pa channel |
+| Command | Skill Used | Default Args |
+|---------|-----------|--------------|
+| `/peter-morning-brief-cmd` | peter-morning-brief-skill | — |
+| `/scan-emails [days]` | calendar-intelligence | days-back: 7 |
+| `/check-birthdays [days]` | calendar-intelligence | days-ahead: 30 |
+| `/summarize-channels` | peter-morning-brief-skill | cowork-pa channel |
 
 ## Project-Level Skills (`.claude/skills/`)
 

@@ -62,18 +62,14 @@ echo ""
 echo "Plugin built: $OUTPUT_DIR/$PLUGIN_NAME.plugin"
 echo ""
 
-# Open the file so Cowork picks it up
-echo "Opening plugin file for Cowork install..."
+# Open the file for Cowork install
 WIN_PLUGIN=$(cygpath -w "$OUTPUT_DIR/$PLUGIN_NAME.plugin" 2>/dev/null)
 if [ -n "$WIN_PLUGIN" ]; then
-    # Windows (Git Bash / MINGW) — use cmd to open
-    cmd.exe //c start "" "$WIN_PLUGIN"
+    explorer.exe "$WIN_PLUGIN"
 elif command -v open &> /dev/null; then
     open "$OUTPUT_DIR/$PLUGIN_NAME.plugin"
 elif command -v xdg-open &> /dev/null; then
     xdg-open "$OUTPUT_DIR/$PLUGIN_NAME.plugin"
-else
-    echo "Auto-open failed. Drag this file into Cowork: $OUTPUT_DIR/$PLUGIN_NAME.plugin"
 fi
 
 echo ""

@@ -4,7 +4,7 @@ description: >
   This skill should be used when Pete asks for a "morning briefing",
   "daily summary", "what's happening today", "catch me up", "morning update",
   or wants a consolidated view of his calendar, emails, and WhatsApp channels.
-version: 0.4.0
+version: 0.4.1
 ---
 
 # Morning Brief
@@ -25,46 +25,54 @@ Present the briefing in this exact order:
 7. **Action Items** — consolidated list of things Pete needs to act on
 
 If a section has zero items, omit it entirely rather than showing an empty heading.
-If all 4 agents fail, skip straight to a short status report instead of an empty briefing.
 
-## Agent Orchestration
+## Data Collection Workflow
 
-Launch all 4 scanner agents in parallel. For each agent, use the **Task tool** to
-spawn a subagent — set the task prompt to: "Read the agent definition at [path] and
-execute its workflow." The 4 tasks should be launched in a single batch so they run
-concurrently:
+Scan each source sequentially using Chrome browser tools. Read the browser guide
+for each service before navigating to it. If a source fails (not signed in,
+CAPTCHA, page won't load), skip it after 15 seconds and move to the next.
 
-1. **gcal-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`
-   Fetches today's events and upcoming birthdays/anniversaries
-2. **gmail-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/gmail-scanner.md`
-   Scans Gmail for unread emails and extracts dates
-3. **outlook-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/outlook-scanner.md`
-   Scans Outlook for unread emails and extracts dates
-4. **whatsapp-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/whatsapp-scanner.md`
-   Scans cowork-pa channel for shared articles
+### Step 1: Google Calendar
 
-Wait for all agents to return, then compile their results.
+Read `${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md`, then:
+- Navigate to calendar.google.com
+- Fetch today's events from the day view
+- Switch to week view to check the next 7 days for birthdays/anniversaries
+- Do NOT enter credentials — Pete will already be signed in
 
-### Compiling Agent Results
+### Step 2: Gmail
 
-- **Calendar + Birthdays**: Use gcal-scanner output directly for the CALENDAR and COMING UP sections.
-- **Email Highlights**: Merge email lists from gmail-scanner and outlook-scanner, keeping them under separate Gmail/Outlook subheadings.
-- **Dates to Add**: Merge the `DATES EXTRACTED` sections from both email agents into one list. Deduplicate any dates that appear in both. Sort by confidence (HIGH first).
-- **Channel Digest**: Use whatsapp-scanner output directly.
-- **Action Items**: Synthesize from all sources — emails needing replies, dates to add to calendar, upcoming birthdays needing attention.
+Read `${CLAUDE_PLUGIN_ROOT}/references/browser-gmail-guide.md`, then:
+- Navigate to mail.google.com
+- Search for unread emails from the last 24 hours using `is:unread newer_than:1d`
+- Prioritize emails from known contacts and starred messages
+- Extract any dates, deadlines, or commitments mentioned in email bodies
+- For date extraction patterns, refer to `${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`
 
-### Handling Agent Status Codes
+### Step 3: Outlook
 
-Each agent returns a status header. Handle failures gracefully:
+Read `${CLAUDE_PLUGIN_ROOT}/references/browser-outlook-guide.md`, then:
+- Navigate to outlook.live.com
+- Read the inbox for unread emails from the last 24 hours
+- Extract key information: sender, subject, preview, any dates mentioned
+- For date extraction patterns, refer to `${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`
 
-- `*_STATUS: OK` — include the agent's data in the briefing
-- `*_STATUS: NOT_SIGNED_IN` — skip that source, add a note at the end: "[Service] skipped — not signed in"
-- `*_STATUS: CAPTCHA_BLOCKED` — skip, note: "[Service] skipped — CAPTCHA required"
-- `*_STATUS: TIMEOUT` — skip, note: "[Service] skipped — page didn't load"
-- `WHATSAPP_STATUS: QR_CODE_NEEDED` — skip, note: "WhatsApp skipped — QR code scan needed"
+### Step 4: WhatsApp "cowork-pa" Channel
 
-Never get stuck on a failed source — compile whatever data is available.
-If all 4 agents fail, inform Pete and suggest checking his browser sign-in status for each service.
+Read `${CLAUDE_PLUGIN_ROOT}/references/browser-whatsapp-guide.md`, then:
+- Navigate to web.whatsapp.com
+- Locate and open the "cowork-pa" channel/group
+- Check for shared articles and links from the last 24 hours
+- Extract article URLs and titles
+- Use WebFetch to read each article, then summarize in 2-3 sentences
+
+### Step 5: Compile Results
+
+- **Calendar + Birthdays**: Today's events and upcoming personal dates
+- **Email Highlights**: Keep Gmail and Outlook under separate subheadings
+- **Dates to Add**: Merge dates from both email sources, deduplicate, sort by confidence (HIGH first)
+- **Channel Digest**: Article summaries from WhatsApp
+- **Action Items**: Synthesize from all sources — emails needing replies, dates to add, upcoming birthdays
 
 ## Presentation Format
 
@@ -98,8 +106,24 @@ ACTION ITEMS
 3. Wish Sarah happy birthday on Thursday
 ```
 
+## Error Handling
+
+- If a service requires sign-in, note "[Service] skipped — not signed in" at the end
+- If a CAPTCHA or verification appears, note "[Service] skipped — CAPTCHA required"
+- If a page won't load after 15 seconds, skip it and move on
+- Never get stuck on one source — compile whatever data is available
+- If all sources fail, inform Pete and suggest checking browser sign-in status
+
 ## Follow-Up Actions
 
 If Pete asks to add any of the extracted dates to his calendar, load the
 calendar-intelligence skill (`${CLAUDE_PLUGIN_ROOT}/skills/calendar-intelligence/SKILL.md`)
 and follow its Calendar Event Creation workflow.
+
+## Resources
+
+- **`${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md`** — Google Calendar navigation
+- **`${CLAUDE_PLUGIN_ROOT}/references/browser-gmail-guide.md`** — Gmail navigation
+- **`${CLAUDE_PLUGIN_ROOT}/references/browser-outlook-guide.md`** — Outlook navigation
+- **`${CLAUDE_PLUGIN_ROOT}/references/browser-whatsapp-guide.md`** — WhatsApp navigation
+- **`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`** — date extraction patterns

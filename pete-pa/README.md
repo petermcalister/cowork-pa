@@ -22,7 +22,7 @@ A Cowork plugin that acts as Pete's personal assistant — managing emails, cale
 
 ```
 pete-pa/
-├── .claude-plugin/plugin.json    # Plugin manifest (v0.4.0)
+├── .claude-plugin/plugin.json    # Plugin manifest (v0.4.1)
 ├── hooks/hooks.json              # SessionStart hook — displays context on load
 ├── references/                   # Shared browser navigation guides
 │   ├── browser-gmail-guide.md
@@ -30,17 +30,12 @@ pete-pa/
 │   ├── browser-gcal-guide.md
 │   ├── browser-whatsapp-guide.md
 │   └── date-patterns.md
-├── agents/                       # Parallel scanner agents
-│   ├── gmail-scanner.md
-│   ├── outlook-scanner.md
-│   ├── gcal-scanner.md
-│   └── whatsapp-scanner.md
 ├── commands/                     # Thin launcher commands
 │   ├── peter-morning-brief-cmd.md
 │   ├── scan-emails.md
 │   ├── check-birthdays.md
 │   └── summarize-channels.md
-└── skills/                       # Orchestration skills
+└── skills/                       # Workflow skills with browser guide references
     ├── peter-morning-brief-skill/
     │   └── SKILL.md
     └── calendar-intelligence/
@@ -49,21 +44,12 @@ pete-pa/
 
 ### How It Works
 
-Commands are thin launchers that load a skill and delegate to scanner agents. Skills orchestrate the agents and compile results. Agents do the actual browser work:
+Commands are thin launchers that load a skill and set tool permissions. Skills contain the full workflow — they read shared browser guides from `references/` and navigate each web service sequentially via Chrome browser tools.
 
-1. **Command** receives user request and loads the relevant skill
-2. **Skill** launches scanner agents in parallel via the Task tool
-3. **Agents** navigate web services via Chrome browser tools, guided by shared reference docs
-4. **Skill** compiles agent results into the final presentation
-
-## Agents
-
-| Agent | Service | Purpose |
-|-------|---------|---------|
-| `gmail-scanner` | Gmail | Scan unread inbox, extract dates |
-| `outlook-scanner` | Outlook | Scan unread inbox, extract dates |
-| `gcal-scanner` | Google Calendar | Read events, find birthdays |
-| `whatsapp-scanner` | WhatsApp | Scan cowork-pa channel, summarize articles |
+1. **Command** receives user request, sets allowed tools, loads the relevant skill
+2. **Skill** reads browser guides from `references/` for each service
+3. **Skill** navigates each service sequentially via Chrome browser tools
+4. **Skill** compiles results and presents to Pete
 
 ## Setup
 
@@ -90,7 +76,6 @@ To set up the daily 7am briefing, create a scheduled shortcut in Cowork:
 ## Components
 
 - **2 Skills**: peter-morning-brief-skill, calendar-intelligence
-- **4 Agents**: gmail-scanner, outlook-scanner, gcal-scanner, whatsapp-scanner
 - **4 Commands**: peter-morning-brief-cmd, scan-emails, check-birthdays, summarize-channels
 - **5 References**: browser guides for Gmail, Outlook, Google Calendar, WhatsApp + date patterns
 - **1 Hook**: SessionStart (loads assistant context)

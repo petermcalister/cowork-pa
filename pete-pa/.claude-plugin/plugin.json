@@ -1,6 +1,6 @@
 {
   "name": "pete-pa",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Pete's Personal Assistant — manages Gmail, Google Calendar, Outlook emails, and the cowork-pa WhatsApp channel with a daily morning briefing, birthday reminders, and automatic date extraction from emails",
   "author": {
     "name": "Pete"
