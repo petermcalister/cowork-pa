@@ -66,12 +66,11 @@ All services are accessed via Chrome browser automation (Claude in Chrome). Sign
 
 The Claude in Chrome extension must be installed and active for browser automation to work.
 
-### Scheduled Morning Brief
+### Running the Morning Brief
 
-Use Cowork's `create-shortcut` skill to schedule the briefing automatically:
-- Command: `/peter-morning-brief-cmd`
-- Schedule: Daily at 08:00
-- Requires: PC to be running and Cowork active
+The morning brief is manually triggered — type `/peter-morning-brief-cmd` in Cowork
+or say "morning briefing" to activate the skill. It generates a styled HTML report
+and opens it in your browser.
 
 ## Components
 
