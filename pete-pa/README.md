@@ -70,7 +70,7 @@ The Claude in Chrome extension must be installed and active for browser automati
 
 Use Cowork's `create-shortcut` skill to schedule the briefing automatically:
 - Command: `/peter-morning-brief-cmd`
-- Schedule: e.g. weekdays at 08:00
+- Schedule: Daily at 08:00
 - Requires: PC to be running and Cowork active
 
 ## Components

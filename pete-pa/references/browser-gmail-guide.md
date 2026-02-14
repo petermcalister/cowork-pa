@@ -41,15 +41,23 @@ To search for specific timeframes, use Gmail's search bar:
    - `is:starred` — starred/flagged messages
 3. Press Enter to filter
 
-### Step 4: Extract Email Details
+### Step 4: Filter and Extract Email Details
 
-For each unread email in the inbox list:
+Refer to `${CLAUDE_PLUGIN_ROOT}/references/petes-interests.md` for filtering rules.
+
+**Skip entirely** — do not include in results:
+- Marketing emails, promotional offers, sale notifications
+- Phishing/scam emails ("verify your account", suspicious links)
+- Automated service notifications (build alerts, PR merged, etc.)
+- Social media notifications (LinkedIn, Twitter/X, Facebook)
+
+**For each remaining unread email:**
 1. Note the sender, subject, and preview snippet
 2. If the preview mentions a date, deadline, or commitment, flag it
 3. Classify priority:
    - **HIGH**: From known contacts, urgent keywords, starred
    - **MEDIUM**: Work-related, contains dates/deadlines
-   - **LOW**: Newsletters, notifications, promotions
+   - **LOW**: Informational but not junk
 
 ### Step 5: Read Full Emails (Optional)
 

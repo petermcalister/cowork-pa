@@ -82,19 +82,23 @@ When Pete asks you to post a report or highlight to the "cowork-pa" channel:
 
 ## Identifying Articles vs Regular Chat
 
-**Include in digest:**
-- URLs with preview cards
-- Shared articles from news sites, blogs, or media outlets
-- YouTube videos with informative content
-- Medium posts, Substack newsletters, research papers
-- Technical documentation or tutorials
+Refer to `${CLAUDE_PLUGIN_ROOT}/references/petes-interests.md` for topic priorities.
+
+**Include in digest** (prioritise engineering/tech content):
+- Engineering blog posts, architecture deep-dives, system design articles
+- AI/ML, LLM, and developer tooling articles
+- Cloud, DevOps, and platform engineering content
+- Open source project announcements and releases
+- Technical documentation, tutorials, and research papers
+- YouTube videos with engineering/tech content
+- Medium posts, Substack newsletters on tech topics
 
 **Skip:**
 - Regular chat messages and casual conversation
 - Memes or images without links
-- Voice messages
-- Status updates
+- Voice messages, status updates
 - Personal messages between members
+- Non-engineering content (lifestyle, sports, entertainment) unless Pete adds those keywords later
 
 ## Error Handling
 

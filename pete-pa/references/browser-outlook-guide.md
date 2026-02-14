@@ -28,10 +28,18 @@ Look for the mail list area — each email typically shows:
 - Timestamp
 - Read/unread status (unread items are typically bold)
 
-### Step 3: Extract Unread Emails
+### Step 3: Filter and Extract Unread Emails
 
 Filter for unread emails from the last 24 hours.
-For each unread email:
+Refer to `${CLAUDE_PLUGIN_ROOT}/references/petes-interests.md` for filtering rules.
+
+**Skip entirely** — do not include in results:
+- Marketing emails, promotional offers, sale notifications
+- Phishing/scam emails ("verify your account", suspicious links)
+- Automated service notifications (build alerts, PR merged, etc.)
+- Social media notifications (LinkedIn, Twitter/X, Facebook)
+
+**For each remaining unread email:**
 1. Note the sender, subject, and preview
 2. If the preview mentions a date, deadline, or commitment, flag it
 3. Classify priority: HIGH (from known contacts, urgent keywords), MEDIUM, LOW
