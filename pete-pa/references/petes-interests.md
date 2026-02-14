@@ -22,11 +22,13 @@ Pete will add specific topics he's tracking here. Until then, favour:
 ### Always skip (do not include in briefings):
 - Marketing emails, promotional offers, sale notifications
 - Phishing attempts, suspicious links, "verify your account" scams
-- Automated notifications from services (build passed, PR merged, etc.)
-- Social media notifications (LinkedIn, Twitter/X, Facebook)
 - Unsubscribe-bait newsletters Pete didn't opt into
 
-### Always include:
+### Summarise briefly (don't skip, but keep concise):
+- Software engineering notifications (build results, PR activity, deploy alerts, CI/CD)
+- LinkedIn updates — especially job changes, posts, and milestones from ex-colleagues
+
+### Always include in full:
 - Emails from real people (personal or work contacts)
 - Calendar invitations and event confirmations
 - Emails containing dates, deadlines, or commitments

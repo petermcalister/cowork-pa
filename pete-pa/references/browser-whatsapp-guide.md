@@ -38,10 +38,14 @@ Click on the "cowork-pa" channel name to open the conversation view.
 
 Use `get_page_text` or `read_page` to read the most recent messages (last 24 hours recommended).
 
+**Important**: Pete uses this channel to save articles throughout the day for later
+reading. Most article links will be posted by Pete himself. Include these — the
+digest is Pete's way of getting summaries of articles he bookmarked.
+
 Look for:
-- Shared article links (URLs with preview cards)
+- Article links posted by Pete (most common — he saves articles here during the day)
+- Articles shared by other channel members
 - Important updates or announcements
-- Reports or summaries that Pete should review
 
 ### 5. Extract Articles
 
@@ -56,7 +60,7 @@ Articles typically appear as:
 For each article found:
 1. Note the URL
 2. Note the article title from the preview
-3. Note who shared it and when
+3. Note who shared it and when (often Pete himself)
 4. Use WebFetch to read the full article content
 
 ### 6. Summarize Articles

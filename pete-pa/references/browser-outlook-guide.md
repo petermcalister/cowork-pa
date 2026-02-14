@@ -36,13 +36,16 @@ Refer to `${CLAUDE_PLUGIN_ROOT}/references/petes-interests.md` for filtering rul
 **Skip entirely** — do not include in results:
 - Marketing emails, promotional offers, sale notifications
 - Phishing/scam emails ("verify your account", suspicious links)
-- Automated service notifications (build alerts, PR merged, etc.)
-- Social media notifications (LinkedIn, Twitter/X, Facebook)
+- Unsubscribe-bait newsletters Pete didn't opt into
+
+**Summarise briefly** (1 line, don't skip):
+- Software engineering notifications (build results, PR activity, CI/CD, deploys)
+- LinkedIn updates — especially job changes, posts, milestones from ex-colleagues
 
 **For each remaining unread email:**
 1. Note the sender, subject, and preview
 2. If the preview mentions a date, deadline, or commitment, flag it
-3. Classify priority: HIGH (from known contacts, urgent keywords), MEDIUM, LOW
+3. Classify priority: HIGH (from known contacts, urgent keywords), MEDIUM (work-related), LOW (engineering notifications, LinkedIn updates)
 
 ### Step 4: Read Important Emails (Optional)
 
