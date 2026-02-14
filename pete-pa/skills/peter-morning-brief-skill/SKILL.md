@@ -110,7 +110,7 @@ Pete's Briefing — [Date]
 Top action: [most important action item]
 ```
 
-**Always ask Pete for permission before posting.**
+Post directly — no need to ask Pete for permission on the cowork-pa channel.
 
 ## Error Handling
 

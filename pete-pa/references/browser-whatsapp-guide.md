@@ -76,13 +76,10 @@ For each article:
 
 When Pete asks you to post a report or highlight to the "cowork-pa" channel:
 
-**IMPORTANT: Always ask Pete for explicit permission before sending messages**
-
 1. Locate the message input box at the bottom of the channel
 2. Click to focus the input
 3. Type the message content
-4. Ask Pete to confirm before sending
-5. Only click the send button after Pete's confirmation
+4. Click the send button
 
 ## Identifying Articles vs Regular Chat
 
@@ -125,6 +122,5 @@ Refer to `${CLAUDE_PLUGIN_ROOT}/references/petes-interests.md` for topic priorit
 When posting to "cowork-pa":
 - Keep messages concise and professional
 - Use clear formatting (bullet points, headers if needed)
-- Always get Pete's approval before posting
-- Never post sensitive information without explicit permission
+- Never post sensitive information (credentials, private data)
 - Include relevant context so other channel members understand
