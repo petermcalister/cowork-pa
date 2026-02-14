@@ -4,27 +4,24 @@ description: >
   This skill should be used when Pete asks for a "morning briefing",
   "daily summary", "what's happening today", "catch me up", "morning update",
   or wants a consolidated view of his calendar, emails, and WhatsApp channels.
-version: 0.4.1
+version: 0.4.2
 ---
 
 # Morning Brief
 
-Compile Pete's daily morning briefing by pulling data from multiple sources
-and presenting a concise, actionable summary.
+Compile Pete's daily morning briefing by pulling data from multiple sources,
+generating a styled HTML report, and presenting a short summary to Pete.
 
 ## Briefing Structure
 
-Present the briefing in this exact order:
+The report contains these sections (omit any section with zero items):
 
-1. **Today's Date & Day** — greeting with current date
-2. **Calendar Snapshot** — today's events from Google Calendar
-3. **Birthday & Anniversary Alerts** — any personal events within the next 7 days
-4. **Email Highlights** — important unread emails from Gmail and Outlook
-5. **Date Commitments Found** — any dates/deadlines extracted from recent emails
-6. **Channel Digest** — article summaries from the "cowork-pa" WhatsApp channel
-7. **Action Items** — consolidated list of things Pete needs to act on
-
-If a section has zero items, omit it entirely rather than showing an empty heading.
+1. **Calendar** — today's events from Google Calendar
+2. **Coming Up** — birthdays and personal events within the next 7 days
+3. **Email Highlights** — important unread emails from Gmail and Outlook
+4. **Dates to Add** — dates/deadlines extracted from recent emails
+5. **Channel Digest** — article summaries from the "cowork-pa" WhatsApp channel
+6. **Action Items** — consolidated list of things Pete needs to act on
 
 ## Data Collection Workflow
 
@@ -66,49 +63,58 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/browser-whatsapp-guide.md`, then:
 - Extract article URLs and titles
 - Use WebFetch to read each article, then summarize in 2-3 sentences
 
-### Step 5: Compile Results
+### Step 5: Generate HTML Report
 
-- **Calendar + Birthdays**: Today's events and upcoming personal dates
-- **Email Highlights**: Keep Gmail and Outlook under separate subheadings
-- **Dates to Add**: Merge dates from both email sources, deduplicate, sort by confidence (HIGH first)
-- **Channel Digest**: Article summaries from WhatsApp
-- **Action Items**: Synthesize from all sources — emails needing replies, dates to add, upcoming birthdays
+1. Read the report template: `${CLAUDE_PLUGIN_ROOT}/references/report-template.html`
+2. Populate the template with collected data:
+   - Replace `{{GREETING}}` with time-of-day greeting (e.g. "Good morning Pete!")
+   - Replace `{{DATE}}` with short date (e.g. "2026-02-14")
+   - Replace `{{DATE_FULL}}` with full date (e.g. "Friday 14 February 2026")
+   - Replace `{{TIMESTAMP}}` with generation time
+   - Replace each `{{*_ITEMS}}` placeholder with `<li>` elements containing the data
+   - Use the CSS classes from the template: `.time`, `.sender`, `.subject`, `.summary`,
+     `.priority-high/medium/low`, `.confidence-high/medium/low`, `.article-link`
+   - Remove any section `<div>` entirely if it has no items
+   - Replace `{{SKIPPED_SOURCES}}` with a list of failed sources, or remove if all OK
+3. Write the HTML file to: `${CLAUDE_PLUGIN_ROOT}/reports/briefing-YYYY-MM-DD.html`
+   (create the `reports/` directory if it doesn't exist)
+4. Open the report in the browser using Bash:
+   - Windows: `cmd.exe /c start "" "path\to\report.html"`
+   - Mac: `open "path/to/report.html"`
 
-## Presentation Format
+### Step 6: Show Summary in Chat
 
-Adapt the greeting to time of day (morning/afternoon/evening). Use a clean, scannable format:
+After generating the HTML report, present a **short summary** (not the full briefing)
+in the chat:
 
 ```
-Good [morning/afternoon/evening] Pete! Here's your briefing for [Day, Date].
+Briefing ready for [Day, Date] — opened in browser.
 
-CALENDAR
-- 09:00 — Team standup
-- 14:00 — Dentist appointment
+Quick summary:
+- [N] calendar events today
+- [N] emails worth reading ([N] with dates to add)
+- [N] articles from cowork-pa channel
+- [N] action items
 
-COMING UP (birthdays & events)
-- Sarah's birthday — Thursday (3 days away)
-
-EMAIL HIGHLIGHTS
-Gmail:
-- [Sender] — [Subject] — [1-line summary]
-Outlook:
-- [Sender] — [Subject] — [1-line summary]
-
-DATES TO ADD TO CALENDAR
-- "Project deadline March 15" (from email by [Sender]) — Confidence: HIGH
-
-CHANNEL DIGEST (cowork-pa)
-- [Article title] — [2-sentence summary]
-
-ACTION ITEMS
-1. Reply to [email from X]
-2. Add March 15 deadline to calendar
-3. Wish Sarah happy birthday on Thursday
+Report saved: reports/briefing-YYYY-MM-DD.html
 ```
+
+### Step 7: Post to WhatsApp (Optional)
+
+If Pete asks to share the briefing to the "cowork-pa" channel, post only a
+**short highlight** — not the full report:
+
+```
+Pete's Briefing — [Date]
+[N] calendar events | [N] emails | [N] articles summarised
+Top action: [most important action item]
+```
+
+**Always ask Pete for permission before posting.**
 
 ## Error Handling
 
-- If a service requires sign-in, note "[Service] skipped — not signed in" at the end
+- If a service requires sign-in, note "[Service] skipped" in the report's skipped sources section
 - If a CAPTCHA or verification appears, note "[Service] skipped — CAPTCHA required"
 - If a page won't load after 15 seconds, skip it and move on
 - Never get stuck on one source — compile whatever data is available
@@ -122,8 +128,10 @@ and follow its Calendar Event Creation workflow.
 
 ## Resources
 
+- **`${CLAUDE_PLUGIN_ROOT}/references/report-template.html`** — HTML report template
 - **`${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md`** — Google Calendar navigation
 - **`${CLAUDE_PLUGIN_ROOT}/references/browser-gmail-guide.md`** — Gmail navigation
 - **`${CLAUDE_PLUGIN_ROOT}/references/browser-outlook-guide.md`** — Outlook navigation
 - **`${CLAUDE_PLUGIN_ROOT}/references/browser-whatsapp-guide.md`** — WhatsApp navigation
 - **`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`** — date extraction patterns
+- **`${CLAUDE_PLUGIN_ROOT}/references/petes-interests.md`** — filtering rules and topic priorities
