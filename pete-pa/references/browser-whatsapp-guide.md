@@ -72,9 +72,19 @@ For each article:
   - Relevance to Pete's work or interests
 - Include the source and who shared it
 
-### 7. Post Reports/Highlights (When Requested)
+### 7. Upload Files to Channel
 
-When Pete asks you to post a report or highlight to the "cowork-pa" channel:
+To upload a file (e.g. an HTML report) to the "cowork-pa" channel:
+
+1. Click the **attachment/paperclip icon** (📎) next to the message input box
+2. Select **"Document"** from the menu
+3. In the file picker, navigate to the file and select it
+4. Add a caption/message if needed (e.g. "Morning Briefing — [Date]")
+5. Click the send button
+
+### 8. Post Text Messages
+
+To post a text message to the channel:
 
 1. Locate the message input box at the bottom of the channel
 2. Click to focus the input

@@ -99,18 +99,19 @@ Quick summary:
 Report saved: reports/briefing-YYYY-MM-DD.html
 ```
 
-### Step 7: Post to WhatsApp (Optional)
+### Step 7: Upload Report to WhatsApp
 
-If Pete asks to share the briefing to the "cowork-pa" channel, post only a
-**short highlight** — not the full report:
+After generating the HTML report, upload it to the "cowork-pa" WhatsApp channel.
+Follow the file upload steps in `${CLAUDE_PLUGIN_ROOT}/references/browser-whatsapp-guide.md` (section 7):
 
-```
-Pete's Briefing — [Date]
-[N] calendar events | [N] emails | [N] articles summarised
-Top action: [most important action item]
-```
+1. Navigate to the cowork-pa channel (should already be open from Step 4)
+2. Click the attachment/paperclip icon (📎)
+3. Select "Document"
+4. Upload the HTML report file: `reports/briefing-YYYY-MM-DD.html`
+5. Add caption: "Morning Briefing — [Date]"
+6. Send
 
-Post directly — no need to ask Pete for permission on the cowork-pa channel.
+This step is not optional — always upload the report to the channel.
 
 ## Error Handling
 
