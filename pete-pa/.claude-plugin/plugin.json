@@ -1,9 +1,9 @@
 {
   "name": "pete-pa",
-  "version": "0.1.0",
-  "description": "Pete's Personal Assistant — manages Gmail, Google Calendar, Outlook emails, WhatsApp and Telegram channels with a daily morning briefing, birthday reminders, and automatic date extraction from emails",
+  "version": "0.4.0",
+  "description": "Pete's Personal Assistant — manages Gmail, Google Calendar, Outlook emails, and the cowork-pa WhatsApp channel with a daily morning briefing, birthday reminders, and automatic date extraction from emails",
   "author": {
     "name": "Pete"
   },
-  "keywords": ["personal-assistant", "gmail", "calendar", "outlook", "whatsapp", "telegram", "peter-morning-brief-skill", "peter-morning-brief-cmd"]
+  "keywords": ["personal-assistant", "gmail", "calendar", "outlook", "whatsapp", "cowork-pa", "peter-morning-brief-skill", "peter-morning-brief-cmd"]
 }

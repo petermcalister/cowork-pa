@@ -45,11 +45,7 @@ If Pete wants more detail on specific emails:
 
 ## Date Extraction Patterns
 
-Look for these patterns in email bodies:
-- Explicit dates: "March 15", "15/03/2026", "next Tuesday"
-- Deadlines: "due by", "deadline", "by end of", "no later than"
-- Meetings: "let's meet", "can we schedule", "how about [day/time]"
-- Events: "invited to", "RSVP", "save the date"
+For comprehensive date extraction patterns, refer to `${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`.
 
 ## Error Handling
 

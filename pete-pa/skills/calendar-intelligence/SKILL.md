@@ -5,7 +5,7 @@ description: >
   "what's in my calendar", "add this to my calendar", "extract dates from emails",
   "find commitments in my inbox", "when is [person]'s birthday", or needs help
   managing personal calendar events and date tracking from email correspondence.
-version: 0.2.0
+version: 0.4.0
 ---
 
 # Calendar Intelligence
@@ -24,13 +24,11 @@ Track recurring personal events in Google Calendar:
 
 **How to find birthdays:**
 
-Use Claude in Chrome browser tools to navigate to calendar.google.com and:
+Launch the **gcal-scanner** agent (`${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`) to:
 - Search for events containing keywords: "birthday", "bday", "b-day"
 - Search for "anniversary"
 - Search for names of family members Pete has mentioned
 - Check that the "Birthdays" calendar (from Google Contacts) is visible in the sidebar
-
-Refer to `references/browser-gcal-guide.md` for detailed browser navigation steps.
 
 Search across the next 30 days for upcoming events.
 Present results sorted by proximity (soonest first).
@@ -48,23 +46,16 @@ Scan recent Gmail and Outlook emails for dates that should be added to Pete's ca
 
 **Extraction process:**
 
-1. Use Chrome browser tools to navigate to mail.google.com and scan recent emails
-   (last 7 days unless specified). Follow `${CLAUDE_PLUGIN_ROOT}/skills/peter-morning-brief-skill/references/browser-gmail-guide.md`.
-2. Use Chrome browser tools to navigate to outlook.live.com and scan the inbox.
-   Follow `${CLAUDE_PLUGIN_ROOT}/skills/peter-morning-brief-skill/references/browser-outlook-guide.md`.
-3. For each email, identify date-bearing content:
-   - Explicit dates: "March 15", "15/03", "next Friday"
-   - Relative dates: "in two weeks", "end of month", "next quarter"
-   - Deadline language: "due by", "deadline", "submit before", "RSVP by"
-   - Meeting proposals: "let's schedule", "how about Tuesday at 3pm"
-   - Event invitations: "you're invited", "save the date", "join us on"
-
-4. For each extracted date, capture:
-   - The date/time (resolve relative dates to absolute)
-   - Source email: sender and subject
-   - Context: what the date is about (1 sentence)
-   - Confidence: HIGH (explicit date), MEDIUM (relative date), LOW (inferred)
-
+1. Launch **gmail-scanner** and **outlook-scanner** agents in parallel:
+   - `${CLAUDE_PLUGIN_ROOT}/agents/gmail-scanner.md`
+   - `${CLAUDE_PLUGIN_ROOT}/agents/outlook-scanner.md`
+2. Both agents will scan emails for the specified period (default: last 7 days) and extract dates
+3. Load the date patterns reference for confidence scoring:
+   `${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`
+4. Compile extracted dates from both agents, scored by confidence:
+   - **HIGH**: Explicit date + deadline/meeting indicator + specific time
+   - **MEDIUM**: Explicit date without time, or relative date with clear context
+   - **LOW**: Vague relative dates, inferred deadlines
 5. Present findings and ask Pete which ones to add to calendar
 
 **Output format:**
@@ -91,26 +82,25 @@ MEDIUM CONFIDENCE:
 When Pete confirms dates to add:
 1. Use Chrome browser tools to navigate to calendar.google.com
 2. Create the event via the browser interface (click Create, fill in details)
-3. Set appropriate reminders (1 day before for deadlines, 1 week for birthdays)
+3. Set appropriate reminders (1 day before for deadlines, 1 hour before for meetings)
 4. Include the source email reference in the event description
 5. For all-day events (birthdays, deadlines), toggle the "All day" option
 6. For timed events, set the specific start and end time
 7. For recurring events (birthdays, anniversaries), set annual recurrence
 
-Refer to `references/browser-gcal-guide.md` Part 2 for event creation steps.
+Refer to `${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md` Part 2 for event creation steps.
 
 ### 4. Calendar Overview
 
 When Pete asks "what's in my calendar" or "what's my week look like":
-1. Navigate to calendar.google.com via Chrome browser
-2. Switch to the appropriate view (day or week)
-3. Read all events for the requested period (default: next 7 days)
-4. Group by day
-5. Highlight conflicts (overlapping events)
-6. Flag any birthdays or personal events
-7. Note free blocks longer than 2 hours
 
-Refer to `references/browser-gcal-guide.md` for navigation steps.
+Launch the **gcal-scanner** agent to read events, then:
+1. Group events by day
+2. Highlight conflicts (overlapping events)
+3. Flag any birthdays or personal events
+4. Note free blocks longer than 2 hours
+
+Refer to `${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md` for navigation steps.
 
 ## Error Handling
 
@@ -119,7 +109,10 @@ Refer to `references/browser-gcal-guide.md` for navigation steps.
 - For ambiguous dates, ask Pete to clarify rather than guessing
 - If a CAPTCHA or verification prompt appears, inform Pete and skip that source
 
-## Additional Resources
+## Resources
 
-- **`references/browser-gcal-guide.md`** — Google Calendar browser navigation (read + create)
-- **`references/date-patterns.md`** — comprehensive date extraction patterns and regex
+- **`${CLAUDE_PLUGIN_ROOT}/references/browser-gcal-guide.md`** — Google Calendar browser navigation (read + create)
+- **`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`** — comprehensive date extraction patterns
+- **`${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`** — calendar scanning agent
+- **`${CLAUDE_PLUGIN_ROOT}/agents/gmail-scanner.md`** — Gmail scanning agent
+- **`${CLAUDE_PLUGIN_ROOT}/agents/outlook-scanner.md`** — Outlook scanning agent

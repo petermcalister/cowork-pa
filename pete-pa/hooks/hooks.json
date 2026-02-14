@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '## Pete PA — Session Context\n\nPetes Personal Assistant is active.\n\nAvailable commands:\n- /peter-morning-brief-cmd — Full daily briefing (calendar + emails + channel digest)\n- /scan-emails [days] — Extract dates from emails and add to calendar\n- /check-birthdays [days] — Check upcoming birthdays and personal events\n- /summarize-channels [channel] — Summarize articles from WhatsApp/Telegram\n\nData sources: Gmail (MCP), Google Calendar (MCP), Outlook (browser), WhatsApp (browser), Telegram (browser)\n\nRemember: Pete prefers concise, actionable summaries. Always greet him by name.'",
+            "command": "echo '## Pete PA — Session Context\n\nPetes Personal Assistant is active.\n\nAvailable commands:\n- /peter-morning-brief-cmd — Full daily briefing (calendar + emails + cowork-pa channel digest)\n- /scan-emails [days] — Extract dates from emails and add to calendar\n- /check-birthdays [days] — Check upcoming birthdays and personal events\n- /summarize-channels — Summarize articles from the cowork-pa WhatsApp channel\n\nData sources: Gmail (browser), Google Calendar (browser), Outlook (browser), WhatsApp cowork-pa channel (browser)\n\nRemember: Pete prefers concise, actionable summaries. Always greet him by name.'",
             "timeout": 5
           }
         ]

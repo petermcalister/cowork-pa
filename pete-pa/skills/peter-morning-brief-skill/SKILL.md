@@ -3,9 +3,9 @@ name: peter-morning-brief-skill
 description: >
   This skill should be used when Pete asks for a "morning briefing",
   "daily summary", "what's happening today", "catch me up", "morning update",
-  or wants a consolidated view of his calendar, emails, and messaging channels.
-  Also triggers when Pete asks to "summarize articles" from WhatsApp or Telegram.
-version: 0.2.0
+  or wants a consolidated view of his calendar, emails, and WhatsApp channels.
+  Also triggers when Pete asks to "summarize articles" from WhatsApp.
+version: 0.4.0
 ---
 
 # Morning Brief
@@ -22,65 +22,35 @@ Present the briefing in this exact order:
 3. **Birthday & Anniversary Alerts** — any personal events within the next 7 days
 4. **Email Highlights** — important unread emails from Gmail and Outlook
 5. **Date Commitments Found** — any dates/deadlines extracted from recent emails
-6. **Channel Digest** — article summaries from WhatsApp and Telegram channels
+6. **Channel Digest** — article summaries from the "cowork-pa" WhatsApp channel
 7. **Action Items** — consolidated list of things Pete needs to act on
 
-## Data Source Workflow
+## Agent Orchestration
 
-### Google Calendar (Browser-based)
+Launch all 4 scanner agents in parallel using the Task tool to gather data concurrently:
 
-Use Claude in Chrome browser tools to:
-- Navigate to calendar.google.com
-- Fetch today's events from the day view
-- Switch to week view to check the next 7 days for upcoming birthdays/anniversaries
-- Search for events with keywords: "birthday", "anniversary", "bday"
-- Do NOT enter credentials — Pete will already be signed in
+1. **gcal-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/gcal-scanner.md`
+   Fetches today's events and upcoming birthdays/anniversaries
+2. **gmail-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/gmail-scanner.md`
+   Scans Gmail for unread emails and extracts dates
+3. **outlook-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/outlook-scanner.md`
+   Scans Outlook for unread emails and extracts dates
+4. **whatsapp-scanner** — `${CLAUDE_PLUGIN_ROOT}/agents/whatsapp-scanner.md`
+   Scans cowork-pa channel for shared articles
 
-Refer to `references/browser-gcal-guide.md` for detailed browser navigation steps.
-The guide is located in the calendar-intelligence skill:
-`${CLAUDE_PLUGIN_ROOT}/skills/calendar-intelligence/references/browser-gcal-guide.md`
+Wait for all agents to return, then compile their results into the briefing format below.
 
-### Gmail (Browser-based)
+### Handling Agent Status Codes
 
-Use Claude in Chrome browser tools to:
-- Navigate to mail.google.com
-- Search for unread emails from the last 24 hours using `is:unread newer_than:1d`
-- Prioritize emails from known contacts and starred messages
-- Extract any dates, deadlines, or commitments mentioned in email bodies
-- Flag emails that contain calendar-worthy dates
-- Do NOT enter credentials — Pete will already be signed in
+Each agent returns a status header. Handle failures gracefully:
 
-Refer to `references/browser-gmail-guide.md` for detailed browser navigation steps.
+- `*_STATUS: OK` — include the agent's data in the briefing
+- `*_STATUS: NOT_SIGNED_IN` — note "[Service] skipped — not signed in" in the briefing
+- `*_STATUS: CAPTCHA_BLOCKED` — note "[Service] skipped — CAPTCHA required" in the briefing
+- `*_STATUS: TIMEOUT` — note "[Service] skipped — page didn't load" in the briefing
+- `WHATSAPP_STATUS: QR_CODE_NEEDED` — note "WhatsApp skipped — QR code scan needed"
 
-### Outlook (Browser-based)
-
-Use Claude in Chrome browser tools to:
-- Navigate to outlook.live.com
-- Read the inbox for unread emails from the last 24 hours
-- Extract key information: sender, subject, preview, any dates mentioned
-- Do NOT enter credentials — Pete will already be signed in
-
-Refer to `references/browser-outlook-guide.md` for detailed browser navigation steps.
-
-### WhatsApp (Browser-based)
-
-Use Claude in Chrome browser tools to:
-- Navigate to web.whatsapp.com (Pete will already be signed in)
-- Check specified channels/groups for shared articles and links
-- Extract article URLs and titles
-- Summarize each article in 2-3 sentences
-
-Refer to `references/browser-messaging-guide.md` for detailed steps.
-
-### Telegram (Browser-based)
-
-Use Claude in Chrome browser tools to:
-- Navigate to web.telegram.org (Pete will already be signed in)
-- Check specified channels for shared articles and links
-- Extract article URLs and titles
-- Summarize each article in 2-3 sentences
-
-Refer to `references/browser-messaging-guide.md` for detailed steps.
+Never get stuck on a failed source — compile whatever data is available.
 
 ## Presentation Format
 
@@ -105,8 +75,9 @@ Outlook:
 DATES TO ADD TO CALENDAR
 - "Project deadline March 15" (from email by [Sender])
 
-CHANNEL DIGEST
-- [Article title] — [2-sentence summary] (from [WhatsApp/Telegram group])
+CHANNEL DIGEST (cowork-pa)
+- [Article title] — [2-sentence summary]
+- [Article title] — [2-sentence summary]
 
 ACTION ITEMS
 1. Reply to [email from X]
@@ -116,13 +87,12 @@ ACTION ITEMS
 
 ## Error Handling
 
-- If a browser source is unavailable (not signed in, page won't load), skip it and note it in the briefing
-- Never get stuck on one source — move on after 30 seconds of trying
-- If a CAPTCHA or verification prompt appears, inform Pete and skip that source
+- If a scanner agent fails or times out, skip that source and note it in the briefing
+- Never get stuck on one source — move on and compile whatever is available
+- If all agents fail, inform Pete and suggest checking browser sign-in status
 
-## Additional Resources
+## Resources
 
-- **`references/browser-gmail-guide.md`** — step-by-step Gmail browser navigation
-- **`references/browser-outlook-guide.md`** — step-by-step Outlook browser navigation
-- **`references/browser-messaging-guide.md`** — WhatsApp and Telegram browser navigation
-- **`${CLAUDE_PLUGIN_ROOT}/skills/calendar-intelligence/references/browser-gcal-guide.md`** — Google Calendar browser navigation
+- **`${CLAUDE_PLUGIN_ROOT}/references/`** — shared browser navigation guides
+- **`${CLAUDE_PLUGIN_ROOT}/agents/`** — parallel scanner agents
+- **`${CLAUDE_PLUGIN_ROOT}/references/date-patterns.md`** — date extraction patterns
