@@ -4,88 +4,85 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Superpowers is a software development workflow system for AI coding agents (Claude Code, Codex, OpenCode). It provides composable "skills" — structured workflow documents that agents load and follow automatically. Skills enforce practices like TDD, systematic debugging, and code review throughout the development process.
+**pete-pa** is a Cowork plugin that serves as Pete's personal assistant. It automates daily productivity workflows by pulling data from Gmail, Outlook, Google Calendar, and the "cowork-pa" WhatsApp channel through browser automation (Claude in Chrome extension) — no API keys or credentials are stored.
 
-**Author:** Jesse Vincent | **License:** MIT | **Repo:** https://github.com/obra/superpowers
+## Build & Deploy
+
+```bash
+./deploy-plugin.sh [path-to-repo]   # Default: ~/RepoBase/cowork-pa
+```
+
+This script pulls latest from `origin/main`, zips the `pete-pa/` directory into `dist/pete-pa.plugin`, and opens it for Cowork installation. On Windows it falls back to PowerShell `Compress-Archive` if `zip` isn't available.
 
 ## Architecture
 
-### Skill System
+### Plugin Structure
 
-The core unit is a **skill** — a `SKILL.md` file with YAML frontmatter (`name` and `description` fields only) containing workflow instructions, flowcharts (DOT/GraphViz), and decision trees that agents follow as mandatory processes.
-
-**Skill loading flow:**
-1. `hooks/hooks.json` defines a SessionStart hook that runs `hooks/session-start.sh`
-2. The hook injects the `using-superpowers` skill content at session start
-3. `using-superpowers` teaches the agent to check for applicable skills before any action
-4. `lib/skills-core.js` handles discovery — finds `SKILL.md` files, extracts frontmatter, resolves paths with shadowing (personal skills override superpowers skills of the same name)
-
-**Skill resolution order:** Personal (`~/.claude/skills/`) → Superpowers (`skills/`). Prefix `superpowers:` to force the superpowers version.
-
-### Directory Layout
-
-- `skills/` — 14 skills organized by concern (testing, debugging, planning, execution, collaboration, meta)
-- `lib/skills-core.js` — Node.js ESM module for skill discovery, frontmatter parsing, path resolution, update checking
-- `hooks/` — SessionStart hook system (hooks.json + session-start.sh + run-hook.cmd for Windows)
-- `commands/` — Slash command definitions (`/brainstorm`, `/write-plan`, `/execute-plan`)
-- `agents/` — Agent templates (e.g., code-reviewer)
-- `docs/` — Developer documentation, plan examples, platform-specific guides
-- `tests/` — Integration tests, skill triggering tests, end-to-end workflow tests
-- `.claude-plugin/` — Claude Code plugin metadata
-- `.codex/`, `.opencode/` — Platform-specific integration files
-
-### The Core Workflow
-
-Skills chain together: **brainstorming** → **using-git-worktrees** → **writing-plans** → **subagent-driven-development** (or **executing-plans**) → **test-driven-development** (throughout) → **requesting-code-review** (between tasks) → **finishing-a-development-branch**
-
-The **subagent-driven-development** skill uses a two-stage review pattern: spec compliance review first, then code quality review, with review loops if issues are found.
-
-## Testing
-
-Tests run real Claude Code sessions in headless mode and verify behavior by parsing JSONL session transcripts.
-
-### Running Tests
-
-```bash
-# Integration test for subagent-driven-development (10-30 min, real Claude execution)
-cd tests/claude-code
-./test-subagent-driven-development-integration.sh
-
-# Skill triggering validation (verifies skills trigger from naive prompts)
-cd tests/skill-triggering
-./run-all.sh
-
-# Token usage analysis from any session transcript
-python3 tests/claude-code/analyze-token-usage.py ~/.claude/projects/<project-dir>/<session-id>.jsonl
+```
+pete-pa/                          # Plugin root (packaged as .plugin ZIP)
+├── .claude-plugin/plugin.json    # Plugin manifest (name, version, description)
+├── hooks/hooks.json              # SessionStart hook — displays context on load
+├── references/                   # Shared browser navigation guides
+│   ├── browser-gmail-guide.md
+│   ├── browser-outlook-guide.md
+│   ├── browser-gcal-guide.md
+│   ├── browser-whatsapp-guide.md
+│   └── date-patterns.md
+├── commands/                     # Thin launcher commands (4 slash commands)
+│   ├── peter-morning-brief-cmd.md
+│   ├── scan-emails.md
+│   ├── check-birthdays.md
+│   └── summarize-channels.md
+└── skills/                       # Workflow skills with browser guide references
+    ├── peter-morning-brief-skill/
+    │   └── SKILL.md
+    └── calendar-intelligence/
+        └── SKILL.md
 ```
 
-### Test Requirements
+### Commands → Skills → References
 
-- Must run from the superpowers plugin directory
-- Claude Code CLI available as `claude`
-- `"superpowers@superpowers-dev": true` in `~/.claude/settings.json` for local dev
-- Test helpers in `tests/claude-code/test-helpers.sh` provide assertions: `contains`, `not_contains`, `count`, `order`, `equals`
+- **Commands** (`commands/*.md`) are thin launchers with YAML frontmatter (`description`, `allowed-tools`, `model`). They load a skill and set tool permissions for the execution context.
+- **Skills** (`skills/*/SKILL.md`) contain the full workflow with YAML frontmatter (`name`, `description`, `version`). They read browser guides from `references/`, navigate each service sequentially via Chrome browser tools, and compile results.
+- **References** (`references/`) are shared browser navigation guides and pattern libraries — single source of truth for browser navigation steps.
 
-### End-to-End Test Projects
+### Data Flow
 
-- `tests/subagent-driven-dev/go-fractals/` — CLI tool with 10 tasks
-- `tests/subagent-driven-dev/svelte-todo/` — CRUD app with 12 tasks
+```
+Command → loads Skill → Skill reads References → navigates browser sequentially → compiles results → presents to Pete
+```
 
-## Key Conventions
+### Key Conventions
 
-### Skill Authoring (CSO — Claude Search Optimization)
+- Commands use `allowed-tools: Read, Grep, Glob, Bash, WebFetch, mcp__Claude_in_Chrome__*` and `model: sonnet`
+- Skills use YAML frontmatter with `name`, `description`, `version` fields
+- Browser guides follow a consistent pattern: prerequisites, step-by-step navigation, data extraction format, error handling
+- The `${CLAUDE_PLUGIN_ROOT}` variable resolves to the plugin root at runtime
+- Date extraction uses confidence scoring (HIGH/MEDIUM/LOW) defined in `references/date-patterns.md`
 
-- Frontmatter `description` MUST start with "Use when..." and describe only triggering conditions
-- NEVER summarize the skill's workflow in the description (Claude will follow the summary instead of reading the full skill)
-- Skill names: lowercase with hyphens, verb-first gerunds preferred (`writing-plans` not `plan-writer`)
-- Flowcharts in DOT format only for non-obvious decision points, never for linear instructions
-- Token budgets: getting-started skills <150 words, frequently-loaded <200 words, others <500 words
-- Cross-reference skills by name with `REQUIRED` markers, never use `@` file links (burns context)
+### Known Limitation: No MCP Tools in Subagents
 
-### Skill Creation Process
+Plugin agents (launched via the Task tool) **cannot access MCP tools** like `mcp__Claude_in_Chrome__*`. MCP connections only exist in the parent session's execution context. All browser automation must happen directly in the skill/command execution, not in subagents. This is why the plugin uses sequential scanning in skills rather than parallel agents.
 
-Skills follow TDD: RED (run pressure scenario without skill, document baseline failures) → GREEN (write minimal skill addressing those failures) → REFACTOR (close rationalization loopholes, re-test). See `skills/writing-skills/SKILL.md`.
+## Current State
 
-### Plan File Naming
+- **Active version**: 0.4.1
+- **WhatsApp**: Focused exclusively on the "cowork-pa" channel (reading articles + posting reports)
+- **Telegram**: Removed in v0.3.0
+- The `claude-plugins-official/` directory contains the cloned Anthropic official plugins repo (reference material for plugin-builder skill)
 
-Plans go in `docs/plans/YYYY-MM-DD-<feature-name>-design.md` or `-plan.md` with exact file paths, not abstract references.
+## Commands Reference
+
+| Command | Skill Used | Default Args |
+|---------|-----------|--------------|
+| `/peter-morning-brief-cmd` | peter-morning-brief-skill | — |
+| `/scan-emails [days]` | calendar-intelligence | days-back: 7 |
+| `/check-birthdays [days]` | calendar-intelligence | days-ahead: 30 |
+| `/summarize-channels` | peter-morning-brief-skill | cowork-pa channel |
+
+## Project-Level Skills (`.claude/skills/`)
+
+| Skill | Purpose |
+|-------|---------|
+| `plugin-builder` | Guides the coding agent through building Cowork/Claude Code plugins. References `pete-pa/` as the living example and `claude-plugins-official/` for official patterns |
+| `skill-builder` | Guides the coding agent through writing effective Claude Code skills. Based on Anthropic's official skill-building guide with patterns and troubleshooting |

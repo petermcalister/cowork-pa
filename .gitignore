@@ -1,3 +1,4 @@
 .worktrees/
 .private-journal/
-.claude/
+dist/
+nul
