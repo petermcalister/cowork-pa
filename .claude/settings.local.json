@@ -55,7 +55,8 @@
       "WebFetch(domain:pypi.org)",
       "Skill(checkin)",
       "Skill(debug-skill)",
-      "Skill(planning-projects)"
+      "Skill(planning-projects)",
+      "Bash(mv superpowers-main:*)"
     ],
     "deny": [],
     "ask": []
