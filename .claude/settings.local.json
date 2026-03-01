@@ -1,0 +1,95 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash pop:*)",
+      "Bash(git stash drop:*)",
+      "Bash(git mv:*)",
+      "Bash(git rm:*)",
+      "Bash(git reset:*)",
+      "Bash(git restore:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git show:*)",
+      "Bash(git worktree:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(echo:*)",
+      "Bash(wc:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(cd:*)",
+      "Bash(set:*)",
+      "Bash(test:*)",
+      "Bash(sed:*)",
+      "Bash(tee:*)",
+      "Bash(xargs:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker-compose:*)",
+      "Bash(powershell:*)",
+      "Bash(powershell -c:*)",
+      "Bash(powershell -Command:*)",
+      "Edit(*)",
+      "Write(*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:pypi.org)",
+      "Skill(checkin)",
+      "Skill(debug-skill)",
+      "Skill(planning-projects)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\notify.wav').PlaySync()\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\chimes.wav').PlaySync()\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\chord.wav').PlaySync()\""
+          }
+        ]
+      }
+    ]
+  }
+}
