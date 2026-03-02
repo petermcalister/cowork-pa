@@ -4,7 +4,7 @@ description: >
   This skill should be used when Pete asks for a "morning briefing",
   "daily summary", "what's happening today", "catch me up", "morning update",
   or wants a consolidated view of his calendar, emails, and WhatsApp channels.
-version: 0.4.2
+version: 0.5.0
 ---
 
 # Morning Brief
@@ -56,11 +56,10 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/browser-outlook-guide.md`, then:
 
 ### Step 4: WhatsApp "cowork-pa" Channel
 
-Read `${CLAUDE_PLUGIN_ROOT}/references/browser-whatsapp-guide.md`, then:
-- Navigate to web.whatsapp.com
-- Locate and open the "cowork-pa" channel/group
-- Check for shared articles and links from the last 24 hours
-- Extract article URLs and titles
+Use MCP tools to read from the cowork-pa WhatsApp group:
+- Call `mcp__whatsapp__list_messages` with `chat_jid: "120363333283720405@g.us"` and `limit: 50`
+- Filter messages from the last 24 hours that contain URLs (article links)
+- For content filtering rules, refer to `${CLAUDE_PLUGIN_ROOT}/references/petes-interests.md`
 - Use WebFetch to read each article, then summarize in 2-3 sentences
 
 ### Step 5: Generate HTML Report
@@ -101,15 +100,14 @@ Report saved: reports/briefing-YYYY-MM-DD.html
 
 ### Step 7: Upload Report to WhatsApp
 
-After generating the HTML report, upload it to the "cowork-pa" WhatsApp channel.
-Follow the file upload steps in `${CLAUDE_PLUGIN_ROOT}/references/browser-whatsapp-guide.md` (section 7):
+After generating the HTML report, upload it to the "cowork-pa" WhatsApp channel using MCP tools:
 
-1. Navigate to the cowork-pa channel (should already be open from Step 4)
-2. Click the attachment/paperclip icon (📎)
-3. Select "Document"
-4. Upload the HTML report file: `reports/briefing-YYYY-MM-DD.html`
-5. Add caption: "Morning Briefing — [Date]"
-6. Send
+1. Call `mcp__whatsapp__send_file` with:
+   - `recipient: "120363333283720405@g.us"`
+   - `media_path`: absolute path to `reports/briefing-YYYY-MM-DD.html`
+2. Call `mcp__whatsapp__send_message` with:
+   - `recipient: "120363333283720405@g.us"`
+   - `message: "Morning Briefing — [Date]"`
 
 This step is not optional — always upload the report to the channel.
 

@@ -1,6 +1,6 @@
 ---
 description: Run Pete's daily morning briefing
-allowed-tools: Read, Write, Grep, Glob, Bash, WebFetch, mcp__Claude_in_Chrome__*
+allowed-tools: Read, Write, Grep, Glob, Bash, WebFetch, mcp__Claude_in_Chrome__*, mcp__whatsapp__*
 model: sonnet
 ---
 

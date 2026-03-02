@@ -3,7 +3,7 @@
 import httpx
 import os
 
-BRIDGE_URL = os.environ.get("WHATSAPP_BRIDGE_URL", "http://localhost:8080")
+BRIDGE_URL = os.environ.get("WHATSAPP_BRIDGE_URL", "http://localhost:8081")
 
 
 async def send_message(recipient: str, message: str) -> dict:
