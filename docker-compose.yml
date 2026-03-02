@@ -1,0 +1,12 @@
+services:
+  whatsapp-bridge:
+    build:
+      context: ./src/whatsapp/bridge
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./store:/app/store
+    restart: unless-stopped
+    # For first-run QR auth, use: docker compose run --rm whatsapp-bridge
+    # After auth, use: docker compose up -d whatsapp-bridge

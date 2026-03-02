@@ -1,0 +1,54 @@
+{
+  "plan_name": "whatsapp-mcp",
+  "created": "2026-03-01",
+  "features": [
+    {
+      "id": "F001",
+      "description": "Go bridge Dockerfile and docker-compose — build upstream whatsapp-bridge from source in Docker with store/ volume mount and port 8080 exposed",
+      "acceptance": "docker compose up whatsapp-bridge builds successfully, container starts and prints QR code to logs",
+      "passes": false
+    },
+    {
+      "id": "F002",
+      "description": "QR auth flow — run bridge interactively, scan QR, verify session persists in store/whatsapp.db across container restarts",
+      "acceptance": "After scanning QR once, docker compose down && docker compose up reconnects without QR prompt",
+      "passes": false
+    },
+    {
+      "id": "F003",
+      "description": "Python MCP server scaffolding — src/whatsapp/mcp_server.py with FastMCP, stdio transport, reads store/messages.db directly via SQLite",
+      "acceptance": "Server starts via python src/whatsapp/mcp_server.py, connects to SQLite, and responds to MCP tool list request",
+      "passes": false
+    },
+    {
+      "id": "F004",
+      "description": "MCP read tools — list_chats, list_messages (with filters: chat_jid, after, before, query, limit), search_contacts, get_chat",
+      "acceptance": "Each tool returns correct data from messages.db when invoked via MCP stdio",
+      "passes": false
+    },
+    {
+      "id": "F005",
+      "description": "MCP send tools — send_message and send_file that POST to Go bridge localhost:8080/api/send",
+      "acceptance": "Sending a test message via MCP tool delivers it to the target WhatsApp chat",
+      "passes": false
+    },
+    {
+      "id": "F006",
+      "description": "Claude Code MCP integration — register whatsapp server in .claude/settings.local.json with stdio command, verify tools appear in Claude Code",
+      "acceptance": "Claude Code shows whatsapp MCP tools in tool list, can call list_chats successfully",
+      "passes": false
+    },
+    {
+      "id": "F007",
+      "description": "Cowork plugin integration — add whatsapp MCP tools to pete-pa plugin allowed-tools, update commands to use MCP tools instead of browser automation for WhatsApp",
+      "acceptance": "pete-pa commands can read WhatsApp messages and post replies via MCP tools instead of Chrome extension",
+      "passes": false
+    },
+    {
+      "id": "F008",
+      "description": "Startup script — single launch script that starts Docker bridge + verifies auth, then confirms MCP server is ready",
+      "acceptance": "Running ./start-whatsapp.sh brings up the bridge and validates connectivity end-to-end",
+      "passes": false
+    }
+  ]
+}

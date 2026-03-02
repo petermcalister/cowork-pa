@@ -1,4 +1,5 @@
 .worktrees/
 .private-journal/
 dist/
+store/
 nul

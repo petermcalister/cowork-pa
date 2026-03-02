@@ -56,7 +56,10 @@
       "Skill(checkin)",
       "Skill(debug-skill)",
       "Skill(planning-projects)",
-      "Bash(mv superpowers-main:*)"
+      "Bash(mv superpowers-main:*)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(go version:*)"
     ],
     "deny": [],
     "ask": []

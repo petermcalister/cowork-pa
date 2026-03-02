@@ -1,0 +1,7 @@
+=== Session: 2026-03-01 (continued) ===
+Plan: whatsapp-mcp
+Worked on: F001 (Go bridge Dockerfile + docker-compose)
+Completed: F001 — Dockerfile (multi-stage alpine build), docker-compose.yml, vendored upstream bridge source, added store/ to .gitignore
+Blocked: Docker Desktop not running — build untested until Pete starts it
+Next session should: Start Docker Desktop, run `docker compose build whatsapp-bridge`, then F002 (QR auth)
+Environment state: src/whatsapp/bridge/ has main.go, go.mod, go.sum, Dockerfile. docker-compose.yml at root. store/ gitignored.
